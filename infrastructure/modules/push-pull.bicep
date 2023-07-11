@@ -2,10 +2,12 @@
 @allowed(['westeurope' 
 ])
 param location string = 'westeurope'
-
+@allowed(['lab','dev','test','prod' 
+])
+param environment string = 'lab'
 
 resource eventgridnamespace 'Microsoft.EventGrid/namespaces@2023-06-01-preview' = {
-  name: 'egns'
+  name: 'egns-${environment}'
   location: location
   properties: {
     // Needs to be true for the template to work in West Europe (Preview)

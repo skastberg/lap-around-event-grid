@@ -18,7 +18,7 @@ jobs:
     - uses: actions/checkout@main
     - name: Get current date
       id: date
-      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
+      run: echo "date=date::$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
       # Log into Azure
     - uses: azure/login@v1
       with:

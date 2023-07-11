@@ -16,7 +16,9 @@ jobs:
 
       # Checkout code
     - uses: actions/checkout@main
-
+    - name: Get current date
+      id: date
+      run: echo "::set-output name=date::$(date +'%Y-%m-%d')"
       # Log into Azure
     - uses: azure/login@v1
       with:
@@ -25,11 +27,11 @@ jobs:
 
       # Deploy Bicep file
     - name: deploy
-      uses: azure/arm-deploy@v1
+      uses: azure/arm-deploy@v1.0.9
       with:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./infrastructure/main.bicep
-        name: 'Infrastructure main'
+        deploymentName: 'Infrastructure main ${{ steps.date.outputs.date }}'
         parameters: 'location=westeurope'
         failOnStdErr: false

@@ -5,7 +5,7 @@ param location string = 'westeurope'
 
 
 module pushpull 'modules/push-pull.bicep' = {
-  name: 'pushpull'
+  name: 'push pull'
   params: {
     location: location
   }

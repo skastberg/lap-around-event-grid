@@ -30,5 +30,6 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: ${{ secrets.AZURE_RG }}
         template: ./infrastructure/main.bicep
+        name: 'Infrastructure main'
         parameters: 'location=westeurope'
         failOnStdErr: false

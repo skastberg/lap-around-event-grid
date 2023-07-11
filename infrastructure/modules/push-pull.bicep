@@ -34,6 +34,9 @@ resource strokeSubscription 'Microsoft.EventGrid/namespaces/topics/eventSubscrip
         'Stroke.FromTee'
       ]
     }
+    deliveryConfiguration: {
+      deliveryMode: 'Queue'
+    }
   }
 
 }

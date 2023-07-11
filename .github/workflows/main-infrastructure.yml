@@ -54,6 +54,6 @@ jobs:
         subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
         resourceGroupName: '${{ secrets.AZURE_RG }}-${{ env.target_env }}'
         template: ./infrastructure/main.bicep
-        deploymentName: 'Infrastructure_deploy_${{ steps.date.outputs.date }}'
+        deploymentName: 'Infrastructure_deploy_${{ steps.date.outputs.date }}-${{ env.target_env }}'
         parameters: 'location=westeurope environment=${{ env.target_env }}'
         failOnStdErr: false

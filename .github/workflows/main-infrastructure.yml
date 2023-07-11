@@ -40,6 +40,7 @@ jobs:
       run: |
         if [[ $GITHUB_EVENT_NAME != 'push' ]]; then
             echo "target_env=${{inputs.environment}}" >> "$GITHUB_ENV"      
+        fi
       # Log into Azure
     - uses: azure/login@v1
       with:

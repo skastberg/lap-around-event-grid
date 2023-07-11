@@ -8,7 +8,8 @@ resource eventgridnamespace 'Microsoft.EventGrid/namespaces@2023-06-01-preview' 
   name: 'egns'
   location: location
   properties: {
-    
+    isZoneRedundant: false
+    minimumTlsVersionAllowed: '1.2'
   }
 }
 

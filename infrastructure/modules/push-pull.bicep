@@ -17,7 +17,7 @@ resource egtopic 'Microsoft.EventGrid/namespaces/topics@2023-06-01-preview' = {
   name: 'strokeEvents'
   parent: eventgridnamespace
   properties: {
-    eventRetentionInDays: 3
+    eventRetentionInDays: 1
     inputSchema: 'CloudEventSchemaV1_0'
     publisherType: 'Custom'
   }

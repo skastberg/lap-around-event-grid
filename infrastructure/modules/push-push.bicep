@@ -5,7 +5,7 @@ param location string = 'westeurope'
 ])
 param environment string = 'lab'
 
-resource egtopic 'Microsoft.EventGrid/topics@2023-06-01-preview' = {
+resource egtopic 'Microsoft.EventGrid/topics@2022-06-15' = {
   name: 'eg-custom-topic-${environment}'
   location: location
 }

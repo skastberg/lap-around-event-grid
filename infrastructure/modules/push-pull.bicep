@@ -2,6 +2,7 @@
 @allowed(['westeurope' 
 ])
 param location string = 'westeurope'
+
 @allowed(['lab','dev','test','prod'])
 param environment string = 'lab'
 @description('Part of the name that will be suffixed/prefixed')

@@ -1,0 +1,74 @@
+
+# Create an .env file in the same folder that will be ignored
+#clientId=
+#secret=
+#resource=
+
+
+###
+
+# @name auth
+POST https://login.microsoft.com/1f39fa86-9689-41da-b81e-d60e10615bf0/oauth2/token?api-version=1.0 HTTP/1.1
+Content-type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id={{$dotenv clientId}}
+&client_secret={{$dotenv secret}}
+&resource={{$dotenv resource}}
+
+###
+
+GET https://management.azure.com/subscriptions/ecffcc5a-8cb3-4528-abc2-01e9caeba3eb/providers/Microsoft.EventGrid/namespaces?api-version=2023-06-01-preview
+Authorization: Bearer {{auth.response.body.access_token}}
+
+###
+
+@orderId = {{$randomInt 33333 99999}}
+@workitemId = {{$randomInt 33333 99999}}
+
+ POST https://egns-carsample-lab.westeurope-1.eventgrid.azure.net/topics/workitems-lab:publish?api-version=2023-06-01-preview
+ Content-Type: application/cloudevents+json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+{
+    "specversion": "1.0",
+    "type": "workitems.paint",  
+    "source": "/mycontext",
+    "id": "{{$guid}}",
+    "time": "{{$datetime iso8601}}",
+    "subject": "orders/O-{{orderId}}/workitems/{{workitemId}}",    
+    "data": {
+        "orderId": "O-{{orderId}}",
+        "workitemId":"{{workitemId}}",
+        "doneBy":"Samuel"
+     }
+}
+
+###
+
+# @name receiveEvent
+ POST https://egns-carsample-lab.westeurope-1.eventgrid.azure.net/topics/workitems-lab/eventsubscriptions/allEvents:receive?api-version=2023-06-01-preview
+ Content-Type: application/cloudevents+json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+
+###
+# @name ackReceiveEvent
+
+@lockToken = {{receiveEvent.response.body.value[0].brokerProperties.lockToken}}
+
+ POST https://egns-carsample-lab.westeurope-1.eventgrid.azure.net/topics/workitems-lab/eventsubscriptions/allEvents:acknowledge?api-version=2023-06-01-preview
+ Content-Type: application/json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+{ 
+   "lockTokens": [
+   "{{lockToken}}"
+   ]
+   }
+
+
+
+
+ 
+ 

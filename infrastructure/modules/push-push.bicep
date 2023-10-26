@@ -5,8 +5,13 @@ param location string = 'westeurope'
 ])
 param environment string = 'lab'
 param prefix string 
+@allowed(['EventGridSchema','CustomEventSchemaV1_0'])
+param inputSchema string = 'EventGridSchema'
 
 resource egtopic 'Microsoft.EventGrid/topics@2023-06-01-preview' = {
   name: '${prefix}-${environment}'
   location: location
+  properties: {
+    inputSchema: inputSchema
+  }
 }

@@ -35,7 +35,7 @@ resource hrsub 'Microsoft.EventGrid/domains/topics/eventSubscriptions@2023-06-01
       }
     }
     filter: {
-      includedEventTypes: [    ]
+      includedEventTypes: null
     }
   }
 }

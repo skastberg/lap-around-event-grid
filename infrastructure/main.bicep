@@ -42,6 +42,6 @@ module pushpushce 'modules/push-push.bicep' = {
     location: location
     environment: environment
     prefix: '${namepart}events-ce'
-    inputSchema: 'CustomEventSchemaV1_0'
+    inputSchema: 'CloudEventSchemaV1_0'
   }
 }

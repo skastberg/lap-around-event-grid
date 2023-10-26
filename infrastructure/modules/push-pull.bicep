@@ -19,7 +19,7 @@ resource eventgridnamespace 'Microsoft.EventGrid/namespaces@2023-06-01-preview' 
 }
 
 resource egtopic 'Microsoft.EventGrid/namespaces/topics@2023-06-01-preview' = {
-  name: 'strokeEvents-${environment}'
+  name: 'workitems-${environment}'
   parent: eventgridnamespace
   properties: {
     eventRetentionInDays: 1
@@ -29,21 +29,32 @@ resource egtopic 'Microsoft.EventGrid/namespaces/topics@2023-06-01-preview' = {
 }
 
 
-resource strokeSubscription 'Microsoft.EventGrid/namespaces/topics/eventSubscriptions@2023-06-01-preview' = {
-  name: 'fromTeeEvents'
+resource paintSubscription 'Microsoft.EventGrid/namespaces/topics/eventSubscriptions@2023-06-01-preview' = {
+  name: 'paintEvents'
   parent: egtopic
   properties: {
     eventDeliverySchema: 'CloudEventSchemaV1_0'
     filtersConfiguration: {
       includedEventTypes: [
-        'Stroke.FromTee'
+        'workitems.paint'
       ]
     }
     deliveryConfiguration: {
       deliveryMode: 'Queue'
     }
   }
+}
 
+resource allSubscription 'Microsoft.EventGrid/namespaces/topics/eventSubscriptions@2023-06-01-preview' = {
+  name: 'allEvents'
+  parent: egtopic
+  properties: {
+    eventDeliverySchema: 'CloudEventSchemaV1_0'
+    filtersConfiguration: { }
+    deliveryConfiguration: {
+      deliveryMode: 'Queue'
+    }
+  }
 }
 
 

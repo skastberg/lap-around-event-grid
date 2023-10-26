@@ -20,7 +20,7 @@ resource eventGridDomain 'Microsoft.EventGrid/domains@2023-06-01-preview' = {
 }
 
 resource hrTopic 'Microsoft.EventGrid/domains/topics@2023-06-01-preview' = {
-  name: 'hr'
+  name: 'humanresources'
   parent: eventGridDomain
  
 }

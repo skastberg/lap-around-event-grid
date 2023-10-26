@@ -45,3 +45,15 @@ module pushpushce 'modules/push-push.bicep' = {
     inputSchema: 'CloudEventSchemaV1_0'
   }
 }
+
+
+//create domains resource
+
+module domains 'modules/domains.bicep' = {
+  name: '${namepart}_domains'
+  params: {
+    location: location
+    environment: environment
+    namepart: namepart
+  }
+}

@@ -22,5 +22,25 @@ module pushpush 'modules/push-push.bicep' = {
   params: {
     location: location
     environment: environment
+    prefix: 'custom_topic'
+  }
+}
+
+
+module pushpusheg 'modules/push-push.bicep' = {
+  name: 'swetuggevents-eg'
+  params: {
+    location: location
+    environment: environment
+    prefix: 'swetuggevents-eg'
+  }
+}
+
+module pushpushce 'modules/push-push.bicep' = {
+  name: 'swetuggevents-ce'
+  params: {
+    location: location
+    environment: environment
+    prefix: 'swetuggevents-ce'
   }
 }

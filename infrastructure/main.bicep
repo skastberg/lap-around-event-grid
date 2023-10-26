@@ -22,7 +22,7 @@ module pushpush 'modules/push-push.bicep' = {
   params: {
     location: location
     environment: environment
-    prefix: '${namepart}-custom_topic'
+    prefix: '${namepart}-custom-topic'
   }
 }
 

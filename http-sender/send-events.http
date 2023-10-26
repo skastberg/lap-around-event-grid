@@ -1,0 +1,77 @@
+
+# Create an .env file in the same folder that will be ignored
+#clientId=
+#secret=
+#resource=
+#tenantid=
+#subscriptionid=
+#namespace=https://abcx.westeurope-1.eventgrid.azure.net
+
+
+###
+
+# @name auth
+POST https://login.microsoft.com/{{$dotenv tenantid}}/oauth2/token?api-version=1.0 HTTP/1.1
+Content-type: application/x-www-form-urlencoded
+
+grant_type=client_credentials
+&client_id={{$dotenv clientId}}
+&client_secret={{$dotenv secret}}
+&resource={{$dotenv resource}}
+
+###
+
+GET https://management.azure.com/subscriptions/{{$dotenv subscriptionid}}/providers/Microsoft.EventGrid/namespaces?api-version=2023-06-01-preview
+Authorization: Bearer {{auth.response.body.access_token}}
+
+###
+
+@orderId = {{$randomInt 33333 99999}}
+@workitemId = {{$randomInt 33333 99999}}
+
+ POST {{$dotenv namespace}}/topics/workitems-lab:publish?api-version=2023-06-01-preview
+ Content-Type: application/cloudevents+json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+{
+    "specversion": "1.0",
+    "type": "workitems.paint",  
+    "source": "/mycontext",
+    "id": "{{$guid}}",
+    "time": "{{$datetime iso8601}}",
+    "subject": "orders/O-{{orderId}}/workitems/{{workitemId}}",    
+    "data": {
+        "orderId": "O-{{orderId}}",
+        "workitemId":"{{workitemId}}",
+        "doneBy":"Samuel"
+     }
+}
+
+###
+
+# @name receiveEvent
+ POST {{$dotenv namespace}}/topics/workitems-lab/eventsubscriptions/allevents:receive?api-version=2023-06-01-preview
+ Content-Type: application/cloudevents+json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+
+###
+# @name ackReceiveEvent
+
+@lockToken = {{receiveEvent.response.body.value[0].brokerProperties.lockToken}}
+
+ POST {{$dotenv namespace}}/topics/workitems-lab/eventsubscriptions/allevents:acknowledge?api-version=2023-06-01-preview
+ Content-Type: application/json
+ Authorization: SharedAccessKey {{$dotenv accessKey1}}
+
+{ 
+   "lockTokens": [
+   "{{lockToken}}"
+   ]
+   }
+
+
+
+
+ 
+ 

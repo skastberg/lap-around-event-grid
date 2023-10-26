@@ -5,11 +5,11 @@ param location string = 'westeurope'
 @allowed(['lab','dev','test','prod'])
 param environment string = 'lab'
 @description('Part of the name that will be suffixed/prefixed')
-param namepart string = 'carsample'
+param namepart string = 'swetugg'
 
 
 module pushpull 'modules/push-pull.bicep' = {
-  name: 'push_pull'
+  name: '${namepart}_push_pull'
   params: {
     location: location
     namepart: namepart
@@ -18,29 +18,29 @@ module pushpull 'modules/push-pull.bicep' = {
 } 
 
 module pushpush 'modules/push-push.bicep' = {
-  name: 'custom_topic'
+  name: '${namepart}_custom_topic'
   params: {
     location: location
     environment: environment
-    prefix: 'custom_topic'
+    prefix: '${namepart}_custom_topic'
   }
 }
 
 
 module pushpusheg 'modules/push-push.bicep' = {
-  name: 'swetuggevents-eg'
+  name: '${namepart}_swetuggevents-eg'
   params: {
     location: location
     environment: environment
-    prefix: 'swetuggevents-eg'
+    prefix: '${namepart}events-eg'
   }
 }
 
 module pushpushce 'modules/push-push.bicep' = {
-  name: 'swetuggevents-ce'
+  name: '${namepart}_swetuggevents-ce'
   params: {
     location: location
     environment: environment
-    prefix: 'swetuggevents-ce'
+    prefix: '${namepart}events-ce'
   }
 }

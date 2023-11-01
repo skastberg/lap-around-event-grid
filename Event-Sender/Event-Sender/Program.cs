@@ -14,6 +14,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using System.Runtime.CompilerServices;
+using System.ComponentModel;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 
 namespace Event_Sender
 {
@@ -45,70 +48,101 @@ namespace Event_Sender
 
             // Set up Azure credentials
             var credential = new DefaultAzureCredential(options: defaultAzureCredentialOptions);
-            Console.WriteLine("Send EG schema");
-            SendEventGridSchemaEvent(credential); 
-            Console.WriteLine("Enter to continue ...");
-            Console.ReadLine();
-            // CloudEvents            
-            Console.WriteLine("Send CE schema");
-            SendCloudSchemaEvent(credential);
-            Console.WriteLine("Send CE schema Native");
-            SendCloudSchemaNativeEvent(credential);
-            Console.WriteLine("Enter to continue ...");
-            Console.ReadLine();
-            // Domains
-            Console.WriteLine("Send HR events to domain topic");
-            SendEventGridSchemaHREvent(credential);
+
+            while (true)
+            {
+                Console.WriteLine("Select an option:");
+                Console.WriteLine("1. Send EG schema");
+                Console.WriteLine("2. Send CE schema");
+                Console.WriteLine("3. Send CE schema Native");
+                Console.WriteLine("4. Send HR events to domain topic");
+                Console.WriteLine("5. Exit");
+
+                string choice = Console.ReadLine();
+
+                switch (choice)
+                {
+                    case "1":
+                        SendEventGridSchemaEvent(credential);
+                        break;
+                    case "2":
+                        SendCloudSchemaEvent(credential);
+                        break;
+                    case "3":
+                        SendCloudSchemaNativeEvent(credential);
+                        break;
+                    case "4":
+                        SendEventGridSchemaHREvent(credential);
+                        break;
+                    case "5":
+                        return;
+                    default:
+                        Console.WriteLine("Invalid choice. Try again.");
+                        break;
+                }
+
+                Console.WriteLine("Enter to continue ...");
+                Console.ReadLine();
+            }
 
 
         }
         static void SendCloudSchemaEvent(DefaultAzureCredential credential)
         {
+
+            // Using Azure's CloudEvent class to create and send a single event compliant with the CloudEvent schema.
+            // Sets eventType, source, and payload before sending it through Azure's Event Grid SDK.
+            // Check out the SDK here: https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/eventgrid/Azure.Messaging.EventGrid
+
             // Set up the Event Grid client
             // Event Grid endpoint from the portal
             var endpoint = new Uri(configuration["CloudEventsEndpoint"]);
             var client = new EventGridPublisherClient(endpoint, credential);
 
-            var data = new
-            {
-                doorId = 456,
-                buildingName = "DobsTower",
-                customerName = "Cloud Event",
-                email = "johndoe@cloud.com"
-            };
-            string etype = data.doorId % 2 == 0 ? "contoso.building.door.open" : "contoso.building.door.close";
+            // Create the event data with random values
+            var data = new DoorOpenEventData();
+            // Get the event type based on the door id
+            string etype = GetEventType(data.DoorId);
+            // Create the event using CloudEvent schema 
             var newEvent = new CloudEvent(
-                    new Uri("building:DobsTower:door:456").ToString(),
+                    new Uri($"building:{data.BuildingName.ToLower()}:door:{data.DoorId}").ToString(),
                     etype,
                     new BinaryData(Newtonsoft.Json.JsonConvert.SerializeObject(data)),
                     "application/json");
 
             newEvent.Id = Guid.NewGuid().ToString();
             var json = Newtonsoft.Json.JsonConvert.SerializeObject(newEvent);
+
+            Console.WriteLine($"Sending event for building {data.BuildingName} door {data.DoorId} to Event Grid");
             client.SendEvent(newEvent);
         }
 
+
+
         static void SendCloudSchemaNativeEvent(DefaultAzureCredential credential)
         {
+            /******************************************************************************
+            Using the `CloudNative.CloudEvents.CloudEvent` here to create and send a cloudnative event to Azure's Event Grid. 
+            This makes it compliant with the CNCF CloudEvents spec. 
+            Here's how to find this component on GitHub for more details: CloudNative.CloudEvents GitHub Repo https://github.com/cloudevents/sdk-csharp.
+            /******************************************************************************/
+
             // Set up the Event Grid client
             // Event Grid endpoint from the portal
             var endpoint = new Uri(configuration["CloudEventsEndpoint"]);
+        var client = new EventGridPublisherClient(endpoint, credential);
 
-            var client = new EventGridPublisherClient(endpoint, credential);
-
-            var data = new
-            {
-                doorId = 789,
-                buildingName = "DobsTower",
-                customerName = "Cloud Event Native",
-                email = "johndoe@cloud.com"
-            };
-            string etype = data.doorId % 2 == 0 ? "contoso.building.door.open" : "contoso.building.door.close";
-            var newEvent = new CloudNative.CloudEvents.CloudEvent() { Type = etype, Source = new Uri("building:DobsTower:door:456"), DataContentType = "application/json", Data = data };
+        // Create the event data with random values
+            var data = new DoorOpenEventData();
+            // Get the event type based on the door id
+            string etype = GetEventType(data.DoorId);
+             
+            var newEvent = new CloudNative.CloudEvents.CloudEvent() { Type = etype, Source = new Uri($"building:{data.BuildingName.ToLower()}:door:{data.DoorId}"), DataContentType = "application/json", Data = data };
             newEvent.Id = Guid.NewGuid().ToString();
             CloudEventFormatter formatter = new JsonEventFormatter();
             var bytes = formatter.EncodeStructuredModeMessage(newEvent, out var contentType);
             string json = Encoding.UTF8.GetString(bytes.Span);
+            Console.WriteLine($"Sending event for building {data.BuildingName} door {data.DoorId} to Event Grid");
             client.SendCloudNativeCloudEvent(newEvent);
 
 
@@ -118,6 +152,11 @@ namespace Event_Sender
 
         static void SendEventGridSchemaEvent(DefaultAzureCredential credential)
         {
+            /******************************************************************************
+            Using Azure's EventGridEvent from the Azure Event Grid SDK to create and batch-send events.
+            Sending the events in a batch for efficiency. Check out the SDK on GitHub: https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/eventgrid/Azure.Messaging.EventGrid
+            ******************************************************************************/
+
             // Set up the Event Grid client
             var endpoint = new Uri(configuration["EventGridEndpoint"]); // Event Grid endpoint from the portal
             var client = new EventGridPublisherClient(endpoint, credential);
@@ -125,32 +164,33 @@ namespace Event_Sender
             for (int i = 0; i < 50; i++)
             {
                 #region Create data for the event
-                var data = new
-                {
-                    doorId = 123 + i,
-                    buildingName = "DobsTower",
-                    customerName = "John Doe",
-                    email = "johndoe@example.com"
-                };
+                var data = new DoorOpenEventData();
                 #endregion
-                string etype = data.doorId % 2 == 0 ? "contoso.building.door.open" : "contoso.building.door.close";
+                string etype = GetEventType(data.DoorId);
                 // Create the event
                 EventGridEvent e = new EventGridEvent(
                     eventType: etype,
-                    subject: new Uri($"building:DobsTower:door:{data.doorId}").ToString(),
+                    subject: new Uri($"building:{data.BuildingName.ToLower()}:door:{data.DoorId}").ToString(),
                     dataVersion: "1.0",
                     data: new BinaryData(data)
                 );
-                //e.Topic = "line";
+                Console.WriteLine($"Adding event for building {data.BuildingName} door {data.DoorId} to batch");
                 // Add the current event to the list
                 list.Add(e);
             }
             // Send the events batch to the event grid
+            Console.WriteLine("Sending batch of events to Event Grid");
             client.SendEvents(list);
         }
 
         static void SendEventGridSchemaHREvent(DefaultAzureCredential credential)
         {
+            /******************************************************************************
+             * Sending events to a domain topic
+             * Using Azure's EventGridEvent from the Azure Event Grid SDK to create and batch-send events.
+             * The SDK is available on GitHub:  https://github.com/Azure/azure-sdk-for-net/tree/main/sdk/eventgrid/Azure.Messaging.EventGrid
+             * 
+             */
             // Set up the Event Grid client
             var endpoint = new Uri(configuration["DomainEndpoint"]); // Event Grid endpoint from the portal
             var client = new EventGridPublisherClient(endpoint, credential);
@@ -178,6 +218,7 @@ namespace Event_Sender
                         dataVersion: "1.0",
                         data: new BinaryData(data)
                     );
+                    Console.WriteLine($"Adding payroll payment event for employee {empId} to batch");
                     e.Topic = "humanresources";
                     // Add the current event to the list
                     list.Add(e);
@@ -190,9 +231,9 @@ namespace Event_Sender
                     {
                         employeeId = empId,
                         startDate = DateTime.UtcNow.AddDays(i),
-                        freeDays = (123+i) % 7
+                        freeDays = (123 + i) % 7
 
-                        
+
                     };
                     // Create the event
                     EventGridEvent e = new EventGridEvent(
@@ -202,13 +243,25 @@ namespace Event_Sender
                         data: new BinaryData(data)
                     );
                     e.Topic = "humanresources";
+                    Console.WriteLine($"Adding vacation booked event for employee {empId} to batch");
                     // Add the current event to the list
                     list.Add(e);
                 }
 
             }
+            Console.WriteLine("Sending batch of events to Event Grid");
             // Send the events batch to the event grid
             client.SendEvents(list);
+        }
+
+        /// <summary>
+        /// Returns the event type based on the door id, just to fake some data.
+        /// </summary>
+        /// <param name="doorid"></param>
+        /// <returns>string</returns>
+        private static string GetEventType(int doorid)
+        {
+            return doorid % 2 == 0 ? "contoso.building.door.open" : "contoso.building.door.close";
         }
 
 

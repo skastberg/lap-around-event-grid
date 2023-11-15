@@ -20,6 +20,7 @@ resource eventGridDomain 'Microsoft.EventGrid/domains@2023-06-01-preview' = {
 }
 
 resource hrTopic 'Microsoft.EventGrid/domains/topics@2023-06-01-preview' = {
+
   name: 'humanresources'
   parent: eventGridDomain
 }
@@ -40,6 +41,10 @@ resource hrsub 'Microsoft.EventGrid/domains/topics/eventSubscriptions@2023-06-01
   }
 }
 
+  name: 'hr'
+  parent: eventGridDomain
+ 
+}
 
 resource financeTopic 'Microsoft.EventGrid/domains/topics@2023-06-01-preview' = {
   name: 'finance'

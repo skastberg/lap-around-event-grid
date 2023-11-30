@@ -1,3 +1,9 @@
 {
-    "sarif-viewer.connectToGithubCodeScanning": "off"
+    "sarif-viewer.connectToGithubCodeScanning": "off",
+    "terminal.integrated.env.windows": {
+        "PATH": "C:\\Users\\SamuelKastberg\\.azurelogicapps\\dependencies\\DotNetSDK;${env:PATH}"
+    },
+    "omnisharp.dotNetCliPaths": [
+        "C:\\Users\\SamuelKastberg\\.azurelogicapps\\dependencies\\DotNetSDK"
+    ]
 }

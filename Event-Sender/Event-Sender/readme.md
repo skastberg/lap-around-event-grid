@@ -41,5 +41,6 @@ Infrastructure is expected to be present in Azure. The sample will not create an
 ```ps
 az login --scope https://eventgrid.azure.net/.default
 ```
-7. Create subscriptions for the events.
-8. Execute the application
+7. To use the updated token, reopen Visual Studio if VS was open before login.
+8. Create subscriptions for the events.
+9. Execute the application

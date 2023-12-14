@@ -1,11 +1,12 @@
 
 # Create an .env file in the same folder that will be ignored
-#clientId=
-#secret=
-#resource=
-#tenantid=
+#clientId=ClientId used to login Entra ID and be able to list the Namespaces
+#secret=Secret for the client id
+#resource=https://management.azure.com
+#tenantid=Your tenant
 #subscriptionid=
 #namespace=https://abcx.westeurope-1.eventgrid.azure.net
+#accessKey1=Access key for the namespace
 
 
 ###

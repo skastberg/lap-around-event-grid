@@ -46,6 +46,7 @@ namespace Event_Sender
             DefaultAzureCredentialOptions defaultAzureCredentialOptions = new DefaultAzureCredentialOptions();
             defaultAzureCredentialOptions.VisualStudioTenantId = configuration["VisualStudioTenantId"];
 
+
             // Set up Azure credentials
             var credential = new DefaultAzureCredential(options: defaultAzureCredentialOptions);
 
